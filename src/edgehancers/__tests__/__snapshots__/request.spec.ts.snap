@@ -1,0 +1,418 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`onRequestHandler > guard - has expected response 1`] = `
+[
+  {
+    "result": {
+      "includes": {
+        "Asset": [
+          {
+            "fields": {
+              "file": {
+                "contentType": "image/svg+xml",
+                "details": {
+                  "image": {
+                    "height": 560,
+                    "width": 560,
+                  },
+                  "size": 7021,
+                },
+                "fileName": "marketer.svg",
+                "url": "//images.ctfassets.net/sf6fwhgksoe0/2HquYLn9LDf6yqxmQ2525o/108ffe81bbfedf42175fe8034c51730b/marketer.svg",
+              },
+              "title": "marketer-hero-image",
+            },
+            "metadata": {
+              "tags": [],
+            },
+            "sys": {
+              "createdAt": "2021-11-16T16:45:36.236Z",
+              "environment": {
+                "sys": {
+                  "id": "master",
+                  "linkType": "Environment",
+                  "type": "Link",
+                },
+              },
+              "id": "2HquYLn9LDf6yqxmQ2525o",
+              "locale": "en-US",
+              "revision": 1,
+              "space": {
+                "sys": {
+                  "id": "sf6fwhgksoe0",
+                  "linkType": "Space",
+                  "type": "Link",
+                },
+              },
+              "type": "Asset",
+              "updatedAt": "2021-11-16T16:45:36.236Z",
+            },
+          },
+        ],
+        "Entry": [
+          {
+            "fields": {
+              "cycle": {
+                "sys": {
+                  "id": "id_1",
+                  "linkType": "Entry",
+                  "type": "Link",
+                },
+              },
+            },
+            "sys": {
+              "id": "cyclic-entry",
+              "type": "Entry",
+            },
+          },
+          {
+            "fields": {
+              "title": "Linked Entry",
+            },
+            "sys": {
+              "id": "linked-entry",
+              "type": "Entry",
+            },
+          },
+        ],
+      },
+      "items": [
+        {
+          "fields": {
+            "buttonText": "Whoa, I am a marketer!",
+            "cycle": {
+              "fields": {
+                "cycle": {
+                  "sys": {
+                    "circular": true,
+                    "id": "id_1",
+                    "linkType": "Entry",
+                    "type": "Link",
+                  },
+                },
+              },
+              "sys": {
+                "id": "cyclic-entry",
+                "type": "Entry",
+              },
+            },
+            "description": "Hey, we think you may be a marketer. This might be of interest to you!",
+            "image": {
+              "fields": {
+                "file": {
+                  "contentType": "image/svg+xml",
+                  "details": {
+                    "image": {
+                      "height": 560,
+                      "width": 560,
+                    },
+                    "size": 7021,
+                  },
+                  "fileName": "marketer.svg",
+                  "url": "//images.ctfassets.net/sf6fwhgksoe0/2HquYLn9LDf6yqxmQ2525o/108ffe81bbfedf42175fe8034c51730b/marketer.svg",
+                },
+                "title": "marketer-hero-image",
+              },
+              "metadata": {
+                "tags": [],
+              },
+              "sys": {
+                "createdAt": "2021-11-16T16:45:36.236Z",
+                "environment": {
+                  "sys": {
+                    "id": "master",
+                    "linkType": "Environment",
+                    "type": "Link",
+                  },
+                },
+                "id": "2HquYLn9LDf6yqxmQ2525o",
+                "locale": "en-US",
+                "revision": 1,
+                "space": {
+                  "sys": {
+                    "id": "sf6fwhgksoe0",
+                    "linkType": "Space",
+                    "type": "Link",
+                  },
+                },
+                "type": "Asset",
+                "updatedAt": "2021-11-16T16:45:36.236Z",
+              },
+            },
+            "link": {
+              "fields": {
+                "title": "Linked Entry",
+              },
+              "sys": {
+                "id": "linked-entry",
+                "type": "Entry",
+              },
+            },
+            "title": "Marketer Hero",
+            "unfrmOptIntentTag": {
+              "intents": {
+                "marketer": {
+                  "str": 50,
+                },
+              },
+            },
+          },
+          "metadata": {
+            "tags": [],
+          },
+          "sys": {
+            "contentType": {
+              "sys": {
+                "id": "hero",
+                "linkType": "ContentType",
+                "type": "Link",
+              },
+            },
+            "createdAt": "2021-11-16T16:45:42.917Z",
+            "environment": {
+              "sys": {
+                "id": "master",
+                "linkType": "Environment",
+                "type": "Link",
+              },
+            },
+            "id": "id_1",
+            "locale": "en-US",
+            "revision": 1,
+            "space": {
+              "sys": {
+                "id": "sf6fwhgksoe0",
+                "linkType": "Space",
+                "type": "Link",
+              },
+            },
+            "type": "Entry",
+            "updatedAt": "2021-11-16T16:45:42.917Z",
+          },
+        },
+        {
+          "fields": {
+            "buttonText": "Whoa, I am a marketer!",
+            "cycle": {
+              "fields": {
+                "cycle": {
+                  "fields": {
+                    "buttonText": "Whoa, I am a marketer!",
+                    "cycle": {
+                      "sys": {
+                        "circular": true,
+                        "id": "cyclic-entry",
+                        "linkType": "Entry",
+                        "type": "Link",
+                      },
+                    },
+                    "description": "Hey, we think you may be a marketer. This might be of interest to you!",
+                    "image": {
+                      "fields": {
+                        "file": {
+                          "contentType": "image/svg+xml",
+                          "details": {
+                            "image": {
+                              "height": 560,
+                              "width": 560,
+                            },
+                            "size": 7021,
+                          },
+                          "fileName": "marketer.svg",
+                          "url": "//images.ctfassets.net/sf6fwhgksoe0/2HquYLn9LDf6yqxmQ2525o/108ffe81bbfedf42175fe8034c51730b/marketer.svg",
+                        },
+                        "title": "marketer-hero-image",
+                      },
+                      "metadata": {
+                        "tags": [],
+                      },
+                      "sys": {
+                        "createdAt": "2021-11-16T16:45:36.236Z",
+                        "environment": {
+                          "sys": {
+                            "id": "master",
+                            "linkType": "Environment",
+                            "type": "Link",
+                          },
+                        },
+                        "id": "2HquYLn9LDf6yqxmQ2525o",
+                        "locale": "en-US",
+                        "revision": 1,
+                        "space": {
+                          "sys": {
+                            "id": "sf6fwhgksoe0",
+                            "linkType": "Space",
+                            "type": "Link",
+                          },
+                        },
+                        "type": "Asset",
+                        "updatedAt": "2021-11-16T16:45:36.236Z",
+                      },
+                    },
+                    "link": {
+                      "sys": {
+                        "id": "linked-entry",
+                        "linkType": "Entry",
+                        "type": "Link",
+                      },
+                    },
+                    "title": "Marketer Hero",
+                    "unfrmOptIntentTag": {
+                      "intents": {
+                        "marketer": {
+                          "str": 50,
+                        },
+                      },
+                    },
+                  },
+                  "metadata": {
+                    "tags": [],
+                  },
+                  "sys": {
+                    "contentType": {
+                      "sys": {
+                        "id": "hero",
+                        "linkType": "ContentType",
+                        "type": "Link",
+                      },
+                    },
+                    "createdAt": "2021-11-16T16:45:42.917Z",
+                    "environment": {
+                      "sys": {
+                        "id": "master",
+                        "linkType": "Environment",
+                        "type": "Link",
+                      },
+                    },
+                    "id": "id_1",
+                    "locale": "en-US",
+                    "revision": 1,
+                    "space": {
+                      "sys": {
+                        "id": "sf6fwhgksoe0",
+                        "linkType": "Space",
+                        "type": "Link",
+                      },
+                    },
+                    "type": "Entry",
+                    "updatedAt": "2021-11-16T16:45:42.917Z",
+                  },
+                },
+              },
+              "sys": {
+                "id": "cyclic-entry",
+                "type": "Entry",
+              },
+            },
+            "description": "Hey, we think you may be a marketer. This might be of interest to you!",
+            "image": {
+              "fields": {
+                "file": {
+                  "contentType": "image/svg+xml",
+                  "details": {
+                    "image": {
+                      "height": 560,
+                      "width": 560,
+                    },
+                    "size": 7021,
+                  },
+                  "fileName": "marketer.svg",
+                  "url": "//images.ctfassets.net/sf6fwhgksoe0/2HquYLn9LDf6yqxmQ2525o/108ffe81bbfedf42175fe8034c51730b/marketer.svg",
+                },
+                "title": "marketer-hero-image",
+              },
+              "metadata": {
+                "tags": [],
+              },
+              "sys": {
+                "createdAt": "2021-11-16T16:45:36.236Z",
+                "environment": {
+                  "sys": {
+                    "id": "master",
+                    "linkType": "Environment",
+                    "type": "Link",
+                  },
+                },
+                "id": "2HquYLn9LDf6yqxmQ2525o",
+                "locale": "en-US",
+                "revision": 1,
+                "space": {
+                  "sys": {
+                    "id": "sf6fwhgksoe0",
+                    "linkType": "Space",
+                    "type": "Link",
+                  },
+                },
+                "type": "Asset",
+                "updatedAt": "2021-11-16T16:45:36.236Z",
+              },
+            },
+            "link": {
+              "fields": {
+                "title": "Linked Entry",
+              },
+              "sys": {
+                "id": "linked-entry",
+                "type": "Entry",
+              },
+            },
+            "title": "Marketer Hero",
+            "unfrmOptIntentTag": {
+              "intents": {
+                "marketer": {
+                  "str": 50,
+                },
+              },
+            },
+          },
+          "metadata": {
+            "tags": [],
+          },
+          "sys": {
+            "contentType": {
+              "sys": {
+                "id": "hero",
+                "linkType": "ContentType",
+                "type": "Link",
+              },
+            },
+            "createdAt": "2021-11-16T16:45:42.917Z",
+            "environment": {
+              "sys": {
+                "id": "master",
+                "linkType": "Environment",
+                "type": "Link",
+              },
+            },
+            "id": "id_2",
+            "locale": "en-US",
+            "revision": 1,
+            "space": {
+              "sys": {
+                "id": "sf6fwhgksoe0",
+                "linkType": "Space",
+                "type": "Link",
+              },
+            },
+            "type": "Entry",
+            "updatedAt": "2021-11-16T16:45:42.917Z",
+          },
+        },
+      ],
+      "limit": 100,
+      "skip": 0,
+      "sys": {
+        "type": "Array",
+      },
+      "total": 1,
+    },
+    "surrogateKeys": [
+      "Asset:2HquYLn9LDf6yqxmQ2525o",
+      "Entry:cyclic-entry",
+      "Entry:id_1",
+      "Entry:id_2",
+      "Entry:linked-entry",
+    ],
+  },
+]
+`;

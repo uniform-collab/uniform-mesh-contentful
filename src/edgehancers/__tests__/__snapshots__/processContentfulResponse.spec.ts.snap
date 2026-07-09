@@ -1,0 +1,351 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`processContentfulResponse > removing of circular references should not affect other items 1`] = `
+{
+  "includes": {
+    "Entry": [
+      {
+        "fields": {
+          "sameLink": {
+            "sys": {
+              "id": "id_1",
+              "linkType": "Entry",
+              "type": "Link",
+            },
+          },
+        },
+        "sys": {
+          "id": "linked-entry",
+          "type": "Entry",
+        },
+      },
+    ],
+  },
+  "items": [
+    {
+      "fields": {
+        "link": {
+          "fields": {
+            "sameLink": {
+              "sys": {
+                "circular": true,
+                "id": "id_1",
+                "linkType": "Entry",
+                "type": "Link",
+              },
+            },
+          },
+          "sys": {
+            "id": "linked-entry",
+            "type": "Entry",
+          },
+        },
+      },
+      "sys": {
+        "id": "id_1",
+        "type": "Entry",
+      },
+    },
+    {
+      "fields": {
+        "link": {
+          "fields": {
+            "sameLink": {
+              "fields": {
+                "link": {
+                  "sys": {
+                    "circular": true,
+                    "id": "linked-entry",
+                    "linkType": "Entry",
+                    "type": "Link",
+                  },
+                },
+              },
+              "sys": {
+                "id": "id_1",
+                "type": "Entry",
+              },
+            },
+          },
+          "sys": {
+            "id": "linked-entry",
+            "type": "Entry",
+          },
+        },
+      },
+      "sys": {
+        "id": "id_2",
+        "type": "Entry",
+      },
+    },
+  ],
+  "limit": 100,
+  "skip": 0,
+  "sys": {
+    "type": "Array",
+  },
+  "total": 1,
+}
+`;
+
+exports[`processContentfulResponse > resolves rich text fields 1`] = `
+{
+  "content": [
+    {
+      "content": [
+        {
+          "data": {},
+          "marks": [],
+          "nodeType": "text",
+          "value": "blah",
+        },
+      ],
+      "data": {},
+      "nodeType": "paragraph",
+    },
+    {
+      "content": [
+        {
+          "data": {},
+          "marks": [],
+          "nodeType": "text",
+          "value": "blah",
+        },
+      ],
+      "data": {},
+      "nodeType": "paragraph",
+    },
+    {
+      "content": [],
+      "data": {
+        "target": {
+          "fields": {
+            "title": "blah",
+          },
+          "metadata": {
+            "tags": [],
+          },
+          "sys": {
+            "contentType": {
+              "sys": {
+                "id": "test",
+                "linkType": "ContentType",
+                "type": "Link",
+              },
+            },
+            "createdAt": "2023-10-24T15:09:07.344Z",
+            "environment": {
+              "sys": {
+                "id": "master",
+                "linkType": "Environment",
+                "type": "Link",
+              },
+            },
+            "id": "2mMhAwpSReQIFfgzGZT1Y5",
+            "locale": "en-US",
+            "revision": 1,
+            "space": {
+              "sys": {
+                "id": "sf6fwhgksoe0",
+                "linkType": "Space",
+                "type": "Link",
+              },
+            },
+            "type": "Entry",
+            "updatedAt": "2023-10-24T15:09:07.344Z",
+          },
+        },
+      },
+      "nodeType": "embedded-entry-block",
+    },
+  ],
+  "data": {},
+  "nodeType": "document",
+}
+`;
+
+exports[`processContentfulResponse > respects depth with \`include\` parameter > include=0 1`] = `
+{
+  "fields": {
+    "linkfield": {
+      "sys": {
+        "id": "level1",
+        "linkType": "Entry",
+        "type": "Link",
+      },
+    },
+  },
+  "sys": {
+    "id": "id_1",
+    "locale": "en-US",
+    "type": "Entry",
+  },
+}
+`;
+
+exports[`processContentfulResponse > respects depth with \`include\` parameter > include=1 1`] = `
+{
+  "fields": {
+    "linkfield": {
+      "fields": {
+        "linkfield": {
+          "fields": {
+            "linkfield": {
+              "sys": {
+                "id": "level3",
+                "linkType": "Entry",
+                "type": "Link",
+              },
+            },
+          },
+          "sys": {
+            "id": "level2",
+            "locale": "en-US",
+            "type": "Entry",
+          },
+        },
+      },
+      "sys": {
+        "id": "level1",
+        "locale": "en-US",
+        "type": "Entry",
+      },
+    },
+  },
+  "sys": {
+    "id": "id_1",
+    "locale": "en-US",
+    "type": "Entry",
+  },
+}
+`;
+
+exports[`processContentfulResponse > respects depth with \`include\` parameter > include=2 1`] = `
+{
+  "fields": {
+    "linkfield": {
+      "fields": {
+        "linkfield": {
+          "fields": {
+            "linkfield": {
+              "sys": {
+                "id": "level3",
+                "linkType": "Entry",
+                "type": "Link",
+              },
+            },
+          },
+          "sys": {
+            "id": "level2",
+            "locale": "en-US",
+            "type": "Entry",
+          },
+        },
+      },
+      "sys": {
+        "id": "level1",
+        "locale": "en-US",
+        "type": "Entry",
+      },
+    },
+  },
+  "sys": {
+    "id": "id_1",
+    "locale": "en-US",
+    "type": "Entry",
+  },
+}
+`;
+
+exports[`processContentfulResponse > respects depth with \`include\` parameter > include=3 1`] = `
+{
+  "fields": {
+    "linkfield": {
+      "fields": {
+        "linkfield": {
+          "fields": {
+            "linkfield": {
+              "fields": {
+                "linkfield": {
+                  "sys": {
+                    "id": "level4",
+                    "linkType": "Entry",
+                    "type": "Link",
+                  },
+                },
+              },
+              "sys": {
+                "id": "level3",
+                "locale": "en-US",
+                "type": "Entry",
+              },
+            },
+          },
+          "sys": {
+            "id": "level2",
+            "locale": "en-US",
+            "type": "Entry",
+          },
+        },
+      },
+      "sys": {
+        "id": "level1",
+        "locale": "en-US",
+        "type": "Entry",
+      },
+    },
+  },
+  "sys": {
+    "id": "id_1",
+    "locale": "en-US",
+    "type": "Entry",
+  },
+}
+`;
+
+exports[`processContentfulResponse > respects depth with \`include\` parameter > include=4 1`] = `
+{
+  "fields": {
+    "linkfield": {
+      "fields": {
+        "linkfield": {
+          "fields": {
+            "linkfield": {
+              "fields": {
+                "linkfield": {
+                  "fields": {},
+                  "sys": {
+                    "id": "level4",
+                    "locale": "en-US",
+                    "type": "Entry",
+                  },
+                },
+              },
+              "sys": {
+                "id": "level3",
+                "locale": "en-US",
+                "type": "Entry",
+              },
+            },
+          },
+          "sys": {
+            "id": "level2",
+            "locale": "en-US",
+            "type": "Entry",
+          },
+        },
+      },
+      "sys": {
+        "id": "level1",
+        "locale": "en-US",
+        "type": "Entry",
+      },
+    },
+  },
+  "sys": {
+    "id": "id_1",
+    "locale": "en-US",
+    "type": "Entry",
+  },
+}
+`;

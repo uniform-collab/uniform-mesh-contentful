@@ -1,0 +1,11 @@
+lerna.json
+tsconfig.json
+node_modules
+.next
+pnpm-lock.yaml
+dist
+public
+build
+out
+.env
+renovate.json5

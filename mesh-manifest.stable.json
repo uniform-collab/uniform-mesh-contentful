@@ -1,0 +1,55 @@
+{
+  "type": "contentful-mesh",
+  "displayName": "Contentful",
+  "logoIconUrl": "https://contentful.mesh.uniform.app/contentful-logo.svg",
+  "badgeIconUrl": "https://contentful.mesh.uniform.app/contentful-badge.svg",
+  "category": "content",
+  "baseLocationUrl": "https://contentful.mesh.uniform.app",
+  "locations": {
+    "install": {
+      "description": [
+        "Integrating Uniform with Contentful allows business users to have complete control over the presentation layer compositions assembled from the existing entries from Contentful without losing the freedom and flexibility of the Headless architecture.",
+        "Uniform allows business users to personalize and A/B test content coming from Contentful without a developer effort."
+      ],
+      "informationUrl": "https://docs.uniform.app/docs/integrations/content/contentful"
+    },
+    "settings": {
+      "url": "/settings"
+    },
+    "dataConnectors": [
+      {
+        "type": "contentful-data-connection",
+        "displayName": "Contentful",
+        "dataSourceEditorUrl": "/data-connection-editor",
+        "supportsUnpublishedData": true,
+        "dataArchetypes": {
+          "singleEntry": {
+            "displayName": "Single Entry",
+            "typeEditorUrl": "/type-editor",
+            "dataEditorUrl": "/entry-archetypes/data-editor"
+          },
+          "multipleEntry": {
+            "displayName": "Multiple Entries",
+            "typeEditorUrl": "/type-editor",
+            "dataEditorUrl": "/entry-archetypes/data-editor"
+          },
+          "queryEntry": {
+            "displayName": "Query",
+            "typeEditorUrl": "/type-editor",
+            "dataEditorUrl": "/query-archetype/data-editor"
+          },
+          "assets": {
+            "displayName": "Assets",
+            "typeEditorUrl": "/assets-archetype/type-editor",
+            "dataEditorUrl": "/assets-archetype/data-editor"
+          },
+          "entryByField": {
+            "displayName": "Entries by Field",
+            "typeEditorUrl": "/entry-by-field-archetype/type-editor",
+            "dataEditorUrl": "/entry-by-field-archetype/data-editor"
+          }
+        }
+      }
+    ]
+  }
+}
