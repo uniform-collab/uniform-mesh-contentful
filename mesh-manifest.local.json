@@ -1,10 +1,10 @@
 {
   "type": "contentful-mesh",
   "displayName": "Contentful (local)",
-  "logoIconUrl": "http://localhost:4046/contentful-logo.svg",
-  "badgeIconUrl": "http://localhost:4046/contentful-badge.svg",
+  "logoIconUrl": "https://localhost:4046/contentful-logo.svg",
+  "badgeIconUrl": "https://localhost:4046/contentful-badge.svg",
   "category": "content",
-  "baseLocationUrl": "http://localhost:4046",
+  "baseLocationUrl": "https://localhost:4046",
   "locations": {
     "install": {
       "description": [
@@ -26,17 +26,47 @@
           "singleEntry": {
             "displayName": "Single Entry",
             "typeEditorUrl": "/type-editor",
-            "dataEditorUrl": "/entry-archetypes/data-editor"
+            "dataEditorUrl": "/entry-archetypes/data-editor",
+            "dataEditorUrlLocations": {
+              "embeddedEditor": {
+                "url": "../../dataResourceEmbeddedEditor",
+                "layout": {
+                  "height": "full-height",
+                  "width": "wide"
+                }
+              }
+            },
+            "embeddedEditor": "/embeddedEditor"
           },
           "multipleEntry": {
             "displayName": "Multiple Entries",
             "typeEditorUrl": "/type-editor",
-            "dataEditorUrl": "/entry-archetypes/data-editor"
+            "dataEditorUrl": "/entry-archetypes/data-editor",
+            "dataEditorUrlLocations": {
+              "embeddedEditor": {
+                "url": "../../dataResourceEmbeddedEditor",
+                "layout": {
+                  "height": "full-height",
+                  "width": "wide"
+                }
+              }
+            },
+            "embeddedEditor": "/embeddedEditor"
           },
           "queryEntry": {
             "displayName": "Query",
             "typeEditorUrl": "/type-editor",
-            "dataEditorUrl": "/query-archetype/data-editor"
+            "dataEditorUrl": "/query-archetype/data-editor",
+            "dataEditorUrlLocations": {
+              "embeddedEditor": {
+                "url": "../../dataResourceEmbeddedEditor",
+                "layout": {
+                  "height": "full-height",
+                  "width": "wide"
+                }
+              }
+            },
+            "embeddedEditor": "/embeddedEditor"
           },
           "assets": {
             "displayName": "Assets",
@@ -46,7 +76,17 @@
           "entryByField": {
             "displayName": "Entries by Field",
             "typeEditorUrl": "/entry-by-field-archetype/type-editor",
-            "dataEditorUrl": "/entry-by-field-archetype/data-editor"
+            "dataEditorUrl": "/entry-by-field-archetype/data-editor",
+            "dataEditorUrlLocations": {
+              "embeddedEditor": {
+                "url": "../../dataResourceEmbeddedEditor",
+                "layout": {
+                  "height": "full-height",
+                  "width": "wide"
+                }
+              }
+            },
+            "embeddedEditor": "/embeddedEditor"
           }
         }
       }

@@ -1,4 +1,4 @@
-import React, { ChangeEvent, FC, useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useAsync } from 'react-use';
 import {
   Callout,
@@ -101,6 +101,8 @@ const EntryQueryTemplate: FC<EntryQueryProps> = ({
       : allowContentTypes[0];
     return allowContentTypes.find(({ id }) => selectedContentTypeId === id) || defaultType;
   }, [allowContentTypeIds.length, allowContentTypes, selectedContentTypeId]);
+  // @todo switch to react-query, because now we reload data manually and twice on top of it, bruh
+  const [needsReload, setNeedsReload] = useState(true);
 
   const { metadata } = useMeshLocation<'dataResource'>();
 
@@ -292,6 +294,8 @@ const EntryQueryTemplate: FC<EntryQueryProps> = ({
       ].filter(({ key }, index, arr) => arr.findLastIndex(({ key: k }) => k === key) === index),
     });
 
+    setNeedsReload(false);
+
     return mapResultEntry(
       response,
       {
@@ -301,7 +305,7 @@ const EntryQueryTemplate: FC<EntryQueryProps> = ({
       },
       allowContentTypes
     );
-  }, [boundQuery, customQuery, selectedContentType, boundLocale, metadata.dataSourceVariant]);
+  }, [boundQuery, customQuery, selectedContentType, boundLocale, metadata.dataSourceVariant, needsReload]);
 
   const sortOptions = useMemo(() => {
     const fields = allowContentTypes?.find(({ id }) => id === queryProps.contentTypeId)?.fields || [];
@@ -331,6 +335,10 @@ const EntryQueryTemplate: FC<EntryQueryProps> = ({
     Boolean(count) &&
     !isNaN(Number(count)) &&
     loadedEntries.length !== Number(count);
+
+  const reloadEntries = useCallback(() => {
+    setNeedsReload(true);
+  }, []);
 
   return (
     <div className="data-type-editor">
@@ -477,6 +485,7 @@ const EntryQueryTemplate: FC<EntryQueryProps> = ({
           contentTypeLabel={selectedContentType.name}
           archetype={ARCHETYPES.QUERY}
           error={errorLoadingEntries}
+          reload={reloadEntries}
         />
       </div>
       {isWrongNumberOfResult && (

@@ -43,6 +43,7 @@ export const AssetsSelectorTemplate: FC<AssetsSelectorProps> = ({
 }) => {
   const { boundQuery, onSetList, onSelectItem, selectedListItems } =
     useObjectSearchContext<Pick<AssetsSelectorProps, 'locale'>>();
+  const [needsReload, setNeedsReload] = useState(false);
 
   const handleLocaleChange = (newLocale: string) => {
     handleSetValue(selectedItemsIds, newLocale);
@@ -102,8 +103,10 @@ export const AssetsSelectorTemplate: FC<AssetsSelectorProps> = ({
       ],
     });
 
+    setNeedsReload(false);
+
     return mapResultAssets(response);
-  }, [boundQuery, boundLocale, metadata.dataSourceVariant]);
+  }, [boundQuery, boundLocale, metadata.dataSourceVariant, needsReload]);
 
   useEffect(
     () => {
@@ -119,7 +122,7 @@ export const AssetsSelectorTemplate: FC<AssetsSelectorProps> = ({
     const loadedObjectsIds = loadedAssets.map(({ id }) => id);
     const hasNewObject = selectedItemsIds.find((id) => !loadedObjectsIds.includes(id));
 
-    if (hasNewObject) {
+    if (hasNewObject || needsReload) {
       const response = await getDataResource<AssetsResponse>({
         method: 'GET',
         path: `/assets`,
@@ -140,7 +143,9 @@ export const AssetsSelectorTemplate: FC<AssetsSelectorProps> = ({
     } else {
       setLoadedAssets(loadedAssets.filter(({ id }) => selectedItemsIds.includes(id)));
     }
-  }, [selectedItemsIds, loadingSearchState, boundLocale, metadata.dataSourceVariant]);
+
+    setNeedsReload(false);
+  }, [selectedItemsIds, loadingSearchState, boundLocale, metadata.dataSourceVariant, needsReload]);
 
   const selectedItems = useMemo(
     () =>
@@ -205,6 +210,7 @@ export const AssetsSelectorTemplate: FC<AssetsSelectorProps> = ({
               key={value.id}
               selectedItem={value}
               disableDnD={selectedItemsIds.length <= 1}
+              reloadEntries={() => setNeedsReload(true)}
             />
           )}
         />

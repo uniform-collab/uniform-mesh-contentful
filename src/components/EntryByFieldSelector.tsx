@@ -1,4 +1,4 @@
-import { FC, useEffect, useState } from 'react';
+import { FC, useCallback, useEffect, useState } from 'react';
 import { useAsync, useDebounce } from 'react-use';
 import {
   DataResourceDynamicInputProvider,
@@ -46,6 +46,7 @@ const EntryByFieldTemplate: FC<EntryByFieldProps> = ({
 
   const [searchKeyword, setSearchKeyword] = useState<string>(slug);
   const [debouncedSearchKeyword, setDebouncedSearchKeyword] = useState<string>(slug);
+  const [needsReload, setNeedsReload] = useState(true);
 
   const { metadata } = useMeshLocation<'dataResource'>();
 
@@ -105,17 +106,31 @@ const EntryByFieldTemplate: FC<EntryByFieldProps> = ({
       ],
     });
 
+    setNeedsReload(false);
+
     return mapResultEntry(response, {
       displayField,
       imagePath,
       archetype: ARCHETYPES.QUERY,
       slugField,
     });
-  }, [boundQuery, imagePath, selectedContentTypeId, slugField, boundLocale, metadata.dataSourceVariant]);
+  }, [
+    boundQuery,
+    imagePath,
+    selectedContentTypeId,
+    slugField,
+    boundLocale,
+    metadata.dataSourceVariant,
+    needsReload,
+  ]);
 
   const fieldDisplayName = slugField?.includes('.')
     ? slugField?.substring(slugField?.lastIndexOf('.') + 1, slugField.length)
     : slugField;
+
+  const reloadEntries = useCallback(() => {
+    setNeedsReload(true);
+  }, []);
 
   return (
     <div className="data-type-editor">
@@ -144,7 +159,12 @@ const EntryByFieldTemplate: FC<EntryByFieldProps> = ({
       {loadingEntries ? (
         <LoadingIndicator />
       ) : (
-        <QueryPreviewList items={loadedEntries} value={debouncedSearchKeyword} error={errorLoadingEntries} />
+        <QueryPreviewList
+          items={loadedEntries}
+          value={debouncedSearchKeyword}
+          error={errorLoadingEntries}
+          reload={reloadEntries}
+        />
       )}
     </div>
   );

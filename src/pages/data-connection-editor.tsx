@@ -124,6 +124,8 @@ const DataConnectionEditor: FC = () => {
             contentManagementToken,
           },
           customPublic: {
+            spaceId,
+            environmentId: environmentId || DEFAULT_ENVIRONMENT,
             previewEnvironmentId,
           },
           ...(enableUnpublishedMode

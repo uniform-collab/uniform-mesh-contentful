@@ -10,7 +10,9 @@ import {
   DataResourceDynamicInputProvider,
   ObjectSearchProvider,
   useMeshLocation,
+  useUniformMeshSdk,
 } from '@uniformdev/mesh-sdk-react';
+import { Button } from '@uniformdev/design-system';
 import {
   ANY_CONTENT_TYPES,
   ARCHETYPES,
@@ -27,6 +29,7 @@ import { SelectedItemComponent } from './SelectedItemComponent';
 import { SelectorDataEditor } from '../types/mesh';
 import { LocaleSelector } from './LocaleSelector';
 import { useDataResourceLocaleInfo } from '../hooks';
+import { css } from '@emotion/react';
 
 export interface EntrySelectorProps {
   contentTypes?: ContentType[];
@@ -58,12 +61,14 @@ const EntrySelectorTemplate: FC<EntrySelectorProps> = ({
   enableFilterByLocale,
   allowContentTypeIds = [],
 }) => {
+  const sdk = useUniformMeshSdk();
   const { boundQuery, query, onSetList, onSelectItem, selectedListItems } = useObjectSearchContext<
     Pick<EntrySelectorProps, 'locale'>,
     InternalEntry
   >();
   const currentDataSourceVariant = useRef<'unpublished' | undefined>();
   const [loadedEntries, setLoadedEntries] = useState<InternalEntry[]>([]);
+  const [needsReload, setNeedsReload] = useState(false);
 
   const selectedContentType = useMemo(() => {
     const defaultType: ContentType = !allowContentTypeIds.length
@@ -181,7 +186,7 @@ const EntrySelectorTemplate: FC<EntrySelectorProps> = ({
         // filtering dublicates, prioritizing parameters Custom Query.
       ].filter(({ key }, index, arr) => arr.findLastIndex(({ key: k }) => k === key) === index),
     });
-
+    setNeedsReload(false);
     return mapResultEntry(
       response,
       {
@@ -191,7 +196,15 @@ const EntrySelectorTemplate: FC<EntrySelectorProps> = ({
       },
       contentTypes
     );
-  }, [boundQuery, selectedContentType, boundLocale, customQuery, imagePath, metadata.dataSourceVariant]);
+  }, [
+    boundQuery,
+    selectedContentType,
+    boundLocale,
+    customQuery,
+    imagePath,
+    metadata.dataSourceVariant,
+    needsReload,
+  ]);
 
   useEffect(
     () => {
@@ -210,7 +223,7 @@ const EntrySelectorTemplate: FC<EntrySelectorProps> = ({
       currentDataSourceVariant.current !== metadata.dataSourceVariant;
     currentDataSourceVariant.current = metadata.dataSourceVariant;
 
-    if (hasNewObject) {
+    if (hasNewObject || needsReload) {
       const isSingleContentTypeFilter = selectedContentType.id !== ANY_CONTENT_TYPES;
       const titleFieldId = isSingleContentTypeFilter ? `fields.${selectedContentType.displayField}` : '';
       const thumbnailFieldId =
@@ -267,7 +280,8 @@ const EntrySelectorTemplate: FC<EntrySelectorProps> = ({
     } else {
       setLoadedEntries(loadedEntries.filter(({ id }) => itemsIds.includes(id)));
     }
-  }, [itemsIds, loadingSearchState, boundLocale, metadata.dataSourceVariant]);
+    setNeedsReload(false);
+  }, [itemsIds, loadingSearchState, boundLocale, metadata.dataSourceVariant, needsReload]);
 
   const selectedItems = useMemo(
     () =>
@@ -348,11 +362,34 @@ const EntrySelectorTemplate: FC<EntrySelectorProps> = ({
           hideRemoveButton={selectedItemsIds.length <= 1}
           onRemoveAllSelected={onRemoveAllSelectedItems}
           whenNothingSelected="Nothing selected yet"
+          additionalButtons={
+            <Button
+              size="sm"
+              buttonType="tertiaryOutline"
+              onClick={async () => {
+                const result = await sdk.openLocationDialog({
+                  locationKey: 'embeddedEditor',
+                  options: { params: { title: `Create new entry`, variables: {}, actionType: 'add_new' } },
+                });
+                handleSetValue({
+                  entryIds: [(result?.value as { entryIds: string })?.entryIds],
+                  locale,
+                });
+              }}
+              css={css`
+                margin-right: var(--spacing-xs);
+              `}
+            >
+              Add new
+            </Button>
+          }
           renderResultComponent={(value) => (
             <SelectedItemComponent
               key={value.id}
               selectedItem={value}
               disableDnD={selectedItemsIds.length <= 1}
+              embeddedEditorEnabled
+              reloadEntries={() => setNeedsReload(true)}
             />
           )}
         />

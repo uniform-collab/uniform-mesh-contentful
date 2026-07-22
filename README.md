@@ -1,12 +1,18 @@
-# Uniform Mesh Contentful
+# Uniform Mesh Contentful (experimental: contextual editing)
 
 Contentful integration for Uniform DXP, built with the Uniform Mesh SDK.
+
+> This is the `experimental/contextual-editing` branch. In addition to the base
+> integration it ships the embedded (contextual) editor: an in-context Contentful
+> entry/asset editor, Contentful OAuth login, and asset uploads. It requires an
+> HTTPS origin and NextAuth configuration (see below).
 
 ## Features
 
 - Browse and select Contentful entries and assets for Uniform Canvas parameters
 - Query-based, single-entry, multiple-entry, entry-by-field and assets data archetypes
 - Edgehancers that resolve and enrich Contentful data at the edge
+- Embedded contextual editor for Contentful entries and assets (OAuth-based)
 
 ## Installation
 
@@ -18,7 +24,13 @@ Contentful integration for Uniform DXP, built with the Uniform Mesh SDK.
 
 ### Deploy Mesh Integration
 
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Funiform-collab%2Funiform-mesh-contentful&project-name=uniform-mesh-contentful&repository-name=uniform-mesh-contentful)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https%3A%2F%2Fgithub.com%2Funiform-collab%2Funiform-mesh-contentful&env=CONTENTFUL_OAUTH_CLIENT_ID,CONTENTFUL_OAUTH_CLIENT_SECRET,NEXTAUTH_SECRET&envDescription=see%20README%20for%20more%20info&project-name=uniform-mesh-contentful&repository-name=uniform-mesh-contentful)
+
+The embedded editor requires the following environment variables:
+
+- **CONTENTFUL_OAUTH_CLIENT_ID** / **CONTENTFUL_OAUTH_CLIENT_SECRET** - OAuth client created in your Contentful account settings
+- **NEXTAUTH_URL** (optional) - the public HTTPS URL of the deployed app
+- **NEXTAUTH_SECRET** - secret used by NextAuth to sign and encrypt JWT tokens and cookies
 
 #### Manual deployment
 
@@ -46,6 +58,26 @@ To run the integration locally:
 1. Copy `.env.example` to `.env` and define the required environment variables
 1. Start the development server: `npm run dev`
 1. Register a custom integration for your team using the manifest from `mesh-manifest.local.json`
+
+### Contentful OAuth application
+
+Your local environment has a unique URL, so it needs a separate OAuth application in Contentful.
+
+- Go to your account settings in Contentful and create a new OAuth client
+- Use `${NEXTAUTH_URL}/login-callback` as the redirect URI (e.g. `https://localhost:4046/login-callback` for development)
+- Put the Client Id and Client Secret in `CONTENTFUL_OAUTH_CLIENT_ID` and `CONTENTFUL_OAUTH_CLIENT_SECRET` in your `.env` file
+
+### Feature flag
+
+Enable the `contextual-editing` feature flag for your environment.
+
+### How to open the embedded editor
+
+- Create a Data Source of type `Contentful`
+- Create a Data Type of type `Single Entry`
+- Go to any composition and add the `Single Entry` Data Resource to the composition
+- Within the Data Resource Editor you will see "Edit" and "Add new" buttons
+- Both buttons open the embedded editor in a new tab that will require you to login first
 
 ## Edgehancers
 

@@ -11,6 +11,7 @@ interface QueryPreviewListProps {
   value?: string;
   archetype?: ARCHETYPES;
   error?: Error;
+  reload: () => void;
 }
 export const QueryPreviewList: FC<QueryPreviewListProps> = ({
   items,
@@ -18,15 +19,21 @@ export const QueryPreviewList: FC<QueryPreviewListProps> = ({
   value,
   archetype = ARCHETYPES.ENTRIES_BY_FIELD,
   error,
+  reload,
 }) => {
   const mappedItems = useMemo(
     () =>
       items.map((entry) => (
         <div key={`dam-selected-item-${entry.id}`} className="loaded-entry">
-          <SelectedItemComponent selectedItem={entry} disableDnD />
+          <SelectedItemComponent
+            embeddedEditorEnabled
+            selectedItem={entry}
+            disableDnD
+            reloadEntries={reload}
+          />
         </div>
       )),
-    [items]
+    [items, reload]
   );
 
   if (error) {

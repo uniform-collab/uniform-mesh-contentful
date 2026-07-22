@@ -1,16 +1,18 @@
 import { FC } from 'react';
-import { ObjectSearchResultItem } from '@uniformdev/mesh-sdk-react';
 import LogoIcon from '../../public/contentful-badge.svg';
 import { UNKNOWN } from '../constants';
 import NoImg from '../../public/no-img.svg';
 import { InternalEntry } from '../types/common';
+import { ContentfulSelectedItem } from './ContentfulSelectedItem';
 
 interface SelectedItemComponentProps {
   selectedItem: InternalEntry;
   disableDnD?: boolean;
 }
 
-export const SelectedItemComponent: FC<SelectedItemComponentProps> = ({ selectedItem, disableDnD }) => {
+export const SelectedItemComponent: FC<
+  SelectedItemComponentProps & { reloadEntries?: () => void; embeddedEditorEnabled?: boolean }
+> = ({ selectedItem, disableDnD, reloadEntries, embeddedEditorEnabled }) => {
   const {
     imageUrl,
     popoverData,
@@ -26,7 +28,7 @@ export const SelectedItemComponent: FC<SelectedItemComponentProps> = ({ selected
   const url = imageUrl || fileUrl;
 
   return (
-    <ObjectSearchResultItem
+    <ContentfulSelectedItem
       id={id}
       title={title}
       contentType={contentType}
@@ -38,6 +40,8 @@ export const SelectedItemComponent: FC<SelectedItemComponentProps> = ({ selected
       publishStatus={publishStatus}
       createdAt={createdAt}
       disableDnD={disableDnD}
+      embeddedEditorEnabled={embeddedEditorEnabled}
+      reloadEntries={reloadEntries}
     />
   );
 };
