@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "next dev --port 4046",
     "build": "next build",
-    "start": "npx serve@latest out --listen 4046",
+    "start": "next start --port 4046",
     "lint": "eslint . --ext .js,.jsx,.ts,.tsx",
     "test": "run-s edgehancer:test",
     "clean": "rimraf .next && rimraf out && rimraf .swc",
@@ -39,17 +39,21 @@
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
+    "@modelcontextprotocol/client": "^2.4.0",
+    "@modelcontextprotocol/server": "^2.4.0",
     "@uniformdev/design-system": "20.60.2",
     "@uniformdev/mesh-edgehancer-sdk": "20.60.2",
     "@uniformdev/mesh-sdk-react": "20.60.2",
     "contentful-resolve-response": "1.9.2",
+    "mcp-handler": "^2.3.0",
     "next": "16.2.10",
     "qs": "6.15.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-select": "5.8.1",
     "react-use": "17.5.0",
-    "timeago.js": "4.0.2"
+    "timeago.js": "4.0.2",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
     "@commitlint/cli": "19.8.1",

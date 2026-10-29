@@ -1,0 +1,87 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>MCP App view harness</title>
+<style>
+  body { margin: 0; font: 13px -apple-system, system-ui, sans-serif; background: #eef1f4; }
+  .col { max-width: 720px; margin: 24px auto; }
+  .bar { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; }
+  .log { font: 11px ui-monospace, Menlo, monospace; background: #fff; border: 1px solid #ccd3da;
+         border-radius: 6px; padding: 8px; height: 120px; overflow: auto; margin-top: 10px; }
+  iframe { width: 100%; border: 1px solid #ccd3da; border-radius: 8px; background: #fff; display: block; }
+</style>
+</head>
+<body>
+<div class="col">
+  <div class="bar">
+    <strong>Host harness</strong>
+    <button id="send">send tool-result</button>
+    <button id="empty">send empty result</button>
+    <span id="h"></span>
+  </div>
+  <iframe id="view" src="/api/mcp/view" sandbox="allow-scripts" height="200"></iframe>
+  <div class="log" id="log"></div>
+</div>
+<script>
+  var frame = document.getElementById('view');
+  var log = document.getElementById('log');
+
+  function write(line) {
+    log.textContent += line + '\n';
+    log.scrollTop = log.scrollHeight;
+  }
+
+  var FIXTURE = {
+    query: 'winter campaign imagery',
+    total: 5,
+    items: [
+      { id: '4XyHero01', kind: 'asset', title: 'Winter hero banner', subtitle: 'winter-hero.jpg',
+        contentType: 'asset', thumbnailUrl: '//images.ctfassets.net/placeholder/winter-hero.jpg' },
+      { id: '7KpLodge22', kind: 'asset', title: 'Alpine lodge at dusk', subtitle: 'lodge-dusk.jpg',
+        contentType: 'asset', thumbnailUrl: '//images.ctfassets.net/placeholder/lodge.jpg' },
+      { id: '9QrCampaign', kind: 'entry', title: 'Winter 2026 campaign landing page',
+        subtitle: 'Seasonal landing page for the winter push', contentType: 'landingPage' },
+      { id: '2BvSnowKit', kind: 'entry', title: 'Snow kit product roundup', contentType: 'article' },
+      { id: '5NmFrost', kind: 'asset', title: 'Frosted window texture', subtitle: 'frost-texture.png',
+        contentType: 'asset', thumbnailUrl: '//images.ctfassets.net/placeholder/frost.png' }
+    ]
+  };
+
+  function toolResult(payload) {
+    return { content: [{ type: 'text', text: JSON.stringify(payload) }] };
+  }
+
+  function post(message) {
+    frame.contentWindow.postMessage(message, '*');
+  }
+
+  window.addEventListener('message', function (event) {
+    var msg = event.data;
+    if (!msg || msg.jsonrpc !== '2.0') return;
+    write('<- ' + (msg.method || ('response id=' + msg.id)) + ' ' +
+          (msg.params ? JSON.stringify(msg.params) : ''));
+
+    if (msg.method === 'ui/initialize') {
+      post({ jsonrpc: '2.0', id: msg.id, result: {
+        hostContext: { displayMode: 'inline', locale: 'en-US', platform: 'web',
+                       containerDimensions: { width: 720, height: 720 } } } });
+      write('-> ui/initialize result');
+    } else if (msg.method === 'ui/notifications/size-changed') {
+      frame.height = msg.params.height;
+      document.getElementById('h').textContent = 'height ' + msg.params.height + 'px';
+    }
+  });
+
+  document.getElementById('send').onclick = function () {
+    post({ jsonrpc: '2.0', method: 'ui/notifications/tool-result', params: { result: toolResult(FIXTURE) } });
+    write('-> ui/notifications/tool-result');
+  };
+  document.getElementById('empty').onclick = function () {
+    post({ jsonrpc: '2.0', method: 'ui/notifications/tool-result',
+           params: { result: toolResult({ query: 'nothing here', total: 0, items: [] }) } });
+    write('-> ui/notifications/tool-result (empty)');
+  };
+</script>
+</body>
+</html>
