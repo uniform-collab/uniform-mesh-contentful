@@ -1,20 +1,17 @@
-import { metadataCorsOptionsRequestHandler, protectedResourceHandler } from 'mcp-handler';
-import { CONTENTFUL_AUTH_SERVER } from '../../../mcp/constants';
+import { corsPreflight, json, originOf } from '../../../mcp/bridge';
 
 /**
- * This server delegates authorization to Contentful's own MCP authorization
- * server, which supports authorization_code + PKCE, refresh tokens and dynamic
- * client registration. Uniform's OAuth provider discovers it from here, so each
- * user connects their own Contentful account and searches run with their
- * permissions.
- *
- * POC caveat: the resulting token's audience is Contentful, and this server
- * forwards it there unchanged. That is coherent as a transparent proxy, but a
- * production version should either run its own authorization server or perform
- * a token exchange rather than accepting a token minted for someone else.
+ * The resource identifier must be this server's own origin: the MCP client SDK
+ * throws if the advertised `resource` does not match the server it fetched this
+ * from, which is why pointing it at Contentful is not an option.
  */
-const handler = protectedResourceHandler({ authServerUrls: [CONTENTFUL_AUTH_SERVER] });
+export function GET(req: Request) {
+  const origin = originOf(req);
+  return json({
+    resource: origin,
+    authorization_servers: [origin],
+    bearer_methods_supported: ['header'],
+  });
+}
 
-const corsHandler = metadataCorsOptionsRequestHandler();
-
-export { handler as GET, corsHandler as OPTIONS };
+export const OPTIONS = corsPreflight;

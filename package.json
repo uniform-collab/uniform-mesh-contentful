@@ -59,7 +59,7 @@
     "@commitlint/cli": "19.8.1",
     "@commitlint/config-conventional": "19.8.1",
     "@types/contentful-resolve-response": "0.1.33",
-    "@types/node": "20.11.22",
+    "@types/node": "^24.19.2",
     "@types/qs": "6.9.11",
     "@types/react": "18.2.55",
     "@types/react-dom": "18.2.19",

@@ -4,6 +4,8 @@ import * as z from 'zod';
 import { MCP_APP_MIME_TYPE, SEARCH_VIEW_URI, VIEW_CSP } from '../../../mcp/constants';
 import { SEARCH_VIEW_HTML } from '../../../mcp/searchView';
 import { searchContentful, validateContentfulToken } from '../../../mcp/contentfulProxy';
+import { AccessEnvelope, PURPOSE } from '../../../mcp/bridge';
+import { unseal } from '../../../mcp/sealed';
 
 const handler = createMcpHandler((server) => {
   /**
@@ -55,8 +57,9 @@ const handler = createMcpHandler((server) => {
       _meta: { ui: { resourceUri: SEARCH_VIEW_URI } },
     },
     async ({ query, kind, spaceId, environmentId, limit }, ctx) => {
-      const token = ctx.http?.authInfo?.token;
-      if (!token) throw new Error('Missing Contentful access token.');
+      // verifyToken put the unsealed Contentful token on the auth info.
+      const token = ctx.http?.authInfo?.extra?.contentfulToken;
+      if (typeof token !== 'string') throw new Error('Missing Contentful access token.');
 
       const payload = await searchContentful({ query, kind, spaceId, environmentId, limit }, token);
 
@@ -82,13 +85,20 @@ const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInf
   // apart from a token Contentful refused.
   if (!bearerToken) return undefined;
 
-  const session = await validateContentfulToken(bearerToken);
+  // The bearer is one of this bridge's sealed envelopes, not a Contentful
+  // token: a client's token is minted for this server's audience and would be
+  // refused by Contentful. Unseal it to recover the Contentful token inside.
+  const envelope = unseal<AccessEnvelope>(PURPOSE.access, bearerToken);
+  if (!envelope) throw new Error('Bearer token is not a token issued by this server.');
+  if (envelope.expiresAt <= Date.now()) throw new Error('Access token has expired.');
+
+  const session = await validateContentfulToken(envelope.accessToken);
 
   return {
     token: bearerToken,
     scopes: [],
     clientId: 'contentful',
-    extra: { environments: session.environments },
+    extra: { environments: session.environments, contentfulToken: envelope.accessToken },
   };
 };
 
