@@ -42,8 +42,14 @@ const handler = createMcpHandler((server) => {
       inputSchema: z.object({
         query: z.string().describe('Free-text search, e.g. "winter campaign imagery".'),
         kind: z.enum(['entry', 'asset']).default('entry').describe('Search entries or assets.'),
-        spaceId: z.string().optional().describe('Restrict to a single space.'),
-        environmentId: z.string().optional().describe('Restrict to a single environment.'),
+        spaceId: z
+          .string()
+          .optional()
+          .describe('Space to search. Defaults to the first space the user authorised.'),
+        environmentId: z
+          .string()
+          .optional()
+          .describe('Environment to search. Defaults to the one paired with the space.'),
         limit: z.number().int().min(1).max(50).default(12),
       }),
       _meta: { ui: { resourceUri: SEARCH_VIEW_URI } },
@@ -76,13 +82,13 @@ const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInf
   // apart from a token Contentful refused.
   if (!bearerToken) return undefined;
 
-  const toolNames = await validateContentfulToken(bearerToken);
+  const session = await validateContentfulToken(bearerToken);
 
   return {
     token: bearerToken,
     scopes: [],
     clientId: 'contentful',
-    extra: { toolNames },
+    extra: { environments: session.environments },
   };
 };
 

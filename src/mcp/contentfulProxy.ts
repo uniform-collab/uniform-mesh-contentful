@@ -1,6 +1,6 @@
-import { Client } from '@modelcontextprotocol/client';
-import { StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
+import { Client, StreamableHTTPClientTransport } from '@modelcontextprotocol/client';
 import { CONTENTFUL_MCP_URL, SearchResultItem, SearchResultPayload } from './constants';
+import { parseAssets, parseEntries, readTotal } from './contentfulPayload';
 
 export interface SearchArgs {
   query: string;
@@ -10,12 +10,17 @@ export interface SearchArgs {
   limit: number;
 }
 
-/**
- * Opens a short-lived MCP session against Contentful's hosted server, carrying
- * the end user's Contentful access token. One session per tool call keeps the
- * serverless function stateless; Contentful scopes the session to the spaces
- * the user picked during the OAuth consent flow.
- */
+/** `list_assets` returns at most three items per call, so a grid needs paging. */
+const ASSET_PAGE_SIZE = 3;
+const MAX_ASSET_PAGES = 6;
+
+export class ContentfulTokenRejected extends Error {
+  constructor(public readonly detail: string) {
+    super(`Contentful rejected the access token: ${detail}`);
+    this.name = 'ContentfulTokenRejected';
+  }
+}
+
 async function withContentfulMcp<T>(accessToken: string, run: (client: Client) => Promise<T>): Promise<T> {
   const client = new Client({ name: 'uniform-contentful', version: '0.0.0' });
   const transport = new StreamableHTTPClientTransport(new URL(CONTENTFUL_MCP_URL), {
@@ -30,174 +35,163 @@ async function withContentfulMcp<T>(accessToken: string, run: (client: Client) =
   }
 }
 
-/**
- * Tool names, cached per access token. Doubles as a token check: if Contentful
- * accepts `initialize` + `tools/list` the token is live, and the names are then
- * already in hand for the search call.
- */
-const TOKEN_TTL_MS = 60_000;
-const tokenCache = new Map<string, { expiresAt: number; toolNames: string[] }>();
+/** Joins a tool result's text content; Contentful answers in text, never JSON. */
+function resultText(result: unknown): string {
+  const content = (result as { content?: unknown }).content;
+  if (!Array.isArray(content)) return '';
+  return content
+    .filter(
+      (part): part is { type: 'text'; text: string } => part?.type === 'text' && typeof part.text === 'string'
+    )
+    .map((part) => part.text)
+    .join('');
+}
 
-export class ContentfulTokenRejected extends Error {
-  constructor(public readonly detail: string) {
-    super(`Contentful rejected the access token: ${detail}`);
-    this.name = 'ContentfulTokenRejected';
+function assertOk(result: unknown, toolName: string): string {
+  const text = resultText(result);
+  if ((result as { isError?: boolean }).isError) {
+    throw new Error(`Contentful's ${toolName} failed: ${text.slice(0, 300)}`);
   }
+  return text;
+}
+
+export interface ContentfulSession {
+  /** `space:environment` pairs the user authorised for this session. */
+  environments: { spaceId: string; environmentId: string }[];
 }
 
 /**
- * Returns the caller's available Contentful tools, or throws
- * {@link ContentfulTokenRejected} when Contentful refuses the token.
+ * Calls `get_initial_context`, which Contentful's server requires before any
+ * other tool ("This tool must be called before using any other tools"). Its
+ * prose also names the authorised `space:environment` pairs, which lets the
+ * search default sensibly when the agent did not name one.
+ */
+async function openSession(client: Client): Promise<ContentfulSession> {
+  const text = assertOk(
+    await client.callTool({ name: 'get_initial_context', arguments: {} }),
+    'get_initial_context'
+  );
+
+  const environments = [...text.matchAll(/^\s*-\s*([A-Za-z0-9_-]+):([A-Za-z0-9_.-]+)\s*$/gm)].map((m) => ({
+    spaceId: m[1],
+    environmentId: m[2],
+  }));
+
+  return { environments };
+}
+
+/**
+ * Validates the token and reports the authorised environments.
  *
  * Throwing rather than returning `undefined` matters for diagnosis: the auth
  * wrapper reports a token it never received and a token Contentful refused with
- * the same "No authorization provided" message, which cannot distinguish a
- * client that omitted the header from an audience-bound token being rejected
- * downstream. A throw surfaces as "Invalid token" instead, and the underlying
- * reason is logged.
- *
- * Either way the caller still gets a real 401, which is what prompts Uniform to
- * run `credentials.refresh()` - a 200 carrying an error body would skip the
- * refresh and bury the problem in the agent's context.
+ * the same "No authorization provided" message. A throw surfaces as "Invalid
+ * token" instead, and the underlying reason is logged.
  */
-export async function validateContentfulToken(accessToken: string): Promise<string[]> {
+const TOKEN_TTL_MS = 60_000;
+const tokenCache = new Map<string, { expiresAt: number; session: ContentfulSession }>();
+
+export async function validateContentfulToken(accessToken: string): Promise<ContentfulSession> {
   const cached = tokenCache.get(accessToken);
-  if (cached && cached.expiresAt > Date.now()) return cached.toolNames;
+  if (cached && cached.expiresAt > Date.now()) return cached.session;
 
   try {
-    const toolNames = await withContentfulMcp(accessToken, async (client) => {
-      const { tools } = await client.listTools();
-      return tools.map((tool) => tool.name);
-    });
-    tokenCache.set(accessToken, { expiresAt: Date.now() + TOKEN_TTL_MS, toolNames });
-    return toolNames;
+    const session = await withContentfulMcp(accessToken, openSession);
+    tokenCache.set(accessToken, { expiresAt: Date.now() + TOKEN_TTL_MS, session });
+    return session;
   } catch (error) {
     tokenCache.delete(accessToken);
     throw new ContentfulTokenRejected(error instanceof Error ? error.message : String(error));
   }
 }
 
-/**
- * Contentful's tool names are not part of a stable contract we can rely on, so
- * pick the search tool off `tools/list` instead of hardcoding a guess.
- */
-function pickSearchTool(toolNames: string[], kind: SearchArgs['kind']): string | undefined {
-  const subject = kind === 'asset' ? /asset/i : /entr/i;
-  const verb = /search|list|query|find/i;
+function resolveTarget(session: ContentfulSession, args: SearchArgs) {
+  const fallback = session.environments[0];
+  const spaceId = args.spaceId ?? fallback?.spaceId;
+  const environmentId = args.environmentId ?? fallback?.environmentId ?? 'master';
 
-  const scored = toolNames
-    .filter((name) => subject.test(name))
-    .sort((a, b) => Number(verb.test(b)) - Number(verb.test(a)));
-
-  return scored.find((name) => verb.test(name)) ?? scored[0];
-}
-
-/** CMA returns localised fields as `{ 'en-US': value }`; take whatever is there. */
-function unwrapLocalised(value: unknown): unknown {
-  if (!value || typeof value !== 'object' || Array.isArray(value)) return value;
-  const values = Object.values(value as Record<string, unknown>);
-  return values.length === 1 ? values[0] : value;
-}
-
-function asString(value: unknown): string | undefined {
-  const unwrapped = unwrapLocalised(value);
-  return typeof unwrapped === 'string' ? unwrapped : undefined;
-}
-
-function normaliseItem(raw: unknown, kind: SearchArgs['kind']): SearchResultItem | undefined {
-  if (!raw || typeof raw !== 'object') return undefined;
-  const item = raw as Record<string, any>;
-  const sys = (item.sys ?? {}) as Record<string, any>;
-  const id = typeof sys.id === 'string' ? sys.id : typeof item.id === 'string' ? item.id : undefined;
-  if (!id) return undefined;
-
-  const fields = (item.fields ?? {}) as Record<string, unknown>;
-  const file = unwrapLocalised(fields.file) as Record<string, any> | undefined;
-  const fileUrl = typeof file?.url === 'string' ? file.url : undefined;
-
-  return {
-    id,
-    kind,
-    title:
-      asString(fields.title) ??
-      asString(fields.name) ??
-      asString(fields.internalName) ??
-      asString(item.title) ??
-      id,
-    subtitle:
-      asString(fields.description) ?? (typeof file?.fileName === 'string' ? file.fileName : undefined),
-    contentType: typeof sys.contentType?.sys?.id === 'string' ? sys.contentType.sys.id : kind,
-    thumbnailUrl: fileUrl && /^(https?:)?\/\//.test(fileUrl) ? fileUrl : undefined,
-    updatedAt: typeof sys.updatedAt === 'string' ? sys.updatedAt : undefined,
-    spaceId: typeof sys.space?.sys?.id === 'string' ? sys.space.sys.id : undefined,
-    environmentId: typeof sys.environment?.sys?.id === 'string' ? sys.environment.sys.id : undefined,
-  };
+  if (!spaceId) {
+    throw new Error(
+      'No Contentful space is available for this user. Pass spaceId explicitly, or check which ' +
+        'spaces were authorised when the Contentful MCP server was connected.'
+    );
+  }
+  return { spaceId, environmentId };
 }
 
 /**
- * Contentful's tools answer with their JSON as text content, so unwrap the text
- * and look for whichever array of records it carries.
+ * Contentful exposes no asset *search* tool - only `list_assets`, which takes no
+ * query - so asset search is a bounded paged listing filtered here.
  */
-function extractItems(result: unknown): unknown[] {
-  const content = (result as any)?.content;
-  const structured = (result as any)?.structuredContent;
+async function searchAssets(
+  client: Client,
+  target: { spaceId: string; environmentId: string },
+  args: SearchArgs
+): Promise<{ items: SearchResultItem[]; total?: number }> {
+  const needle = args.query.trim().toLowerCase();
+  const matches: SearchResultItem[] = [];
+  let total: number | undefined;
+  let skip = 0;
 
-  const candidates: unknown[] = [];
-  if (structured) candidates.push(structured);
+  for (let page = 0; page < MAX_ASSET_PAGES && matches.length < args.limit; page++) {
+    const text = assertOk(
+      await client.callTool({
+        name: 'list_assets',
+        arguments: { ...target, limit: ASSET_PAGE_SIZE, skip },
+      }),
+      'list_assets'
+    );
 
-  if (Array.isArray(content)) {
-    for (const part of content) {
-      if (part?.type === 'text' && typeof part.text === 'string') {
-        try {
-          candidates.push(JSON.parse(part.text));
-        } catch {
-          // Not every text block is JSON; skip it.
-        }
-      }
+    const batch = parseAssets(text);
+    total ??= readTotal(text);
+    if (!batch.length) break;
+
+    for (const item of batch) {
+      const haystack = `${item.title} ${item.subtitle ?? ''}`.toLowerCase();
+      if (!needle || haystack.includes(needle)) matches.push(item);
     }
+
+    skip += ASSET_PAGE_SIZE;
+    if (total !== undefined && skip >= total) break;
   }
 
-  for (const candidate of candidates) {
-    if (Array.isArray(candidate)) return candidate;
-    const items = (candidate as any)?.items ?? (candidate as any)?.results ?? (candidate as any)?.entries;
-    if (Array.isArray(items)) return items;
-  }
-  return [];
+  return { items: matches.slice(0, args.limit), total };
+}
+
+async function searchEntries(
+  client: Client,
+  target: { spaceId: string; environmentId: string },
+  args: SearchArgs
+): Promise<{ items: SearchResultItem[]; total?: number }> {
+  const text = assertOk(
+    await client.callTool({
+      name: 'search_entries',
+      arguments: {
+        ...target,
+        // Free text goes in the nested `query.query` key, mirroring the CDA.
+        query: { ...(args.query.trim() ? { query: args.query.trim() } : {}), limit: args.limit },
+      },
+    }),
+    'search_entries'
+  );
+
+  return { items: parseEntries(text).slice(0, args.limit), total: readTotal(text) };
 }
 
 export async function searchContentful(args: SearchArgs, accessToken: string): Promise<SearchResultPayload> {
-  const cachedNames = tokenCache.get(accessToken)?.toolNames;
-
   return withContentfulMcp(accessToken, async (client) => {
-    const toolNames = cachedNames ?? (await client.listTools()).tools.map((tool) => tool.name);
-    const toolName = pickSearchTool(toolNames, args.kind);
+    const session = await openSession(client);
+    const target = resolveTarget(session, args);
 
-    if (!toolName) {
-      throw new Error(
-        `Contentful's MCP server exposes no ${args.kind} search tool for this user. ` +
-          'Check the tool categories enabled for this space and environment in the Contentful MCP app.'
-      );
-    }
+    const { items, total } =
+      args.kind === 'asset'
+        ? await searchAssets(client, target, args)
+        : await searchEntries(client, target, args);
 
-    const result = await client.callTool({
-      name: toolName,
-      arguments: {
-        query: args.query,
-        ...(args.spaceId ? { spaceId: args.spaceId } : {}),
-        ...(args.environmentId ? { environmentId: args.environmentId } : {}),
-        limit: args.limit,
-      },
-    });
-
-    if ((result as any)?.isError) {
-      const detail = extractItems(result).length ? '' : ` (${toolName})`;
-      throw new Error(`Contentful rejected the search${detail}.`);
-    }
-
-    const items = extractItems(result)
-      .map((item) => normaliseItem(item, args.kind))
-      .filter((item): item is SearchResultItem => Boolean(item));
-
-    return { query: args.query, total: items.length, items: items.slice(0, args.limit) };
+    return {
+      query: args.query,
+      total: total ?? items.length,
+      items: items.map((item) => ({ ...item, ...target })),
+    };
   });
 }

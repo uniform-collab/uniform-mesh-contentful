@@ -1,0 +1,50 @@
+Assets retrieved successfully: 
+<assets>
+  <sys>
+    <type>Array</type>
+  </sys>
+  <total>22</total>
+  <skip>0</skip>
+  <limit>3</limit>
+  <items>
+    <id>4kiqMmS4OUGc6rF5qWW3No</id>
+    <title>Midsummer collection upd</title>
+    <description>en description</description>
+    <fileName>pas-boiz-2.avif</fileName>
+    <contentType>image/avif</contentType>
+    <url>//images.ctfassets.net/o6go8mb2jj2p/4kiqMmS4OUGc6rF5qWW3No/e3a5fd7682f51873d101dc1dc033e716/pas-boiz-2.avif</url>
+    <size>175562</size>
+    <createdAt>2023-08-06T12:20:40.820Z</createdAt>
+    <updatedAt>2026-07-22T12:28:35.804Z</updatedAt>
+    <publishedVersion>20</publishedVersion>
+    <locale>en-US</locale>
+  </items>
+  <items>
+    <id>3hDhqQ5TSr1Ln4mpTwDZ2t</id>
+    <title>my new asset</title>
+    <description/>
+    <fileName>Valentines_Day_Cake</fileName>
+    <contentType>image/jpeg</contentType>
+    <url>//images.ctfassets.net/o6go8mb2jj2p/3hDhqQ5TSr1Ln4mpTwDZ2t/0fb4900690f40e2af266d44451b86b81/cake.jpg</url>
+    <size>93892</size>
+    <createdAt>2024-11-07T23:00:40.366Z</createdAt>
+    <updatedAt>2026-07-22T12:07:27.686Z</updatedAt>
+    <publishedVersion>10</publishedVersion>
+    <locale>en-US</locale>
+  </items>
+  <items>
+    <id>2fEfWDFONFpZ05vTJIOm0D</id>
+    <title>test draft asset</title>
+    <description/>
+    <fileName/>
+    <contentType/>
+    <url/>
+    <size/>
+    <createdAt>2025-02-14T15:58:06.741Z</createdAt>
+    <updatedAt>2026-05-29T11:49:04.391Z</updatedAt>
+    <locale>en-US</locale>
+  </items>
+</assets>
+<total>22</total>
+<limit>3</limit>
+
