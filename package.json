@@ -35,7 +35,8 @@
     "edgehancer:deploy:entryByField": "uniform integration definition edgehancer deploy --connectorType contentful-data-connection --archetype entryByField --hook request ./src/edgehancers/dist/request.mjs",
     "edgehancer:remove:entryByField": "uniform integration definition edgehancer remove --connectorType contentful-data-connection --archetype entryByField --hook request",
     "edgehancer:deploy:assets": "uniform integration definition edgehancer deploy --connectorType contentful-data-connection --archetype assets --hook request ./src/edgehancers/dist/request.mjs",
-    "edgehancer:remove:assets": "uniform integration definition edgehancer remove --connectorType contentful-data-connection --archetype assets --hook request"
+    "edgehancer:remove:assets": "uniform integration definition edgehancer remove --connectorType contentful-data-connection --archetype assets --hook request",
+    "mint-client-id": "tsx scripts/mint-client-id.ts"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -77,6 +78,7 @@
     "prettier": "3.6.2",
     "rimraf": "5.0.10",
     "tsup": "8.3.6",
+    "tsx": "^4.23.15",
     "typescript": "5.7.3",
     "vitest": "3.2.7",
     "vitest-environment-miniflare": "2.14.4"
