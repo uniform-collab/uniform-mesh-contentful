@@ -70,10 +70,13 @@ const handler = createMcpHandler((server) => {
  * whether the token still works.
  */
 const verifyToken = async (_req: Request, bearerToken?: string): Promise<AuthInfo | undefined> => {
+  // Returning undefined yields "No authorization provided"; letting
+  // validateContentfulToken throw yields "Invalid token" and logs the reason.
+  // Keeping the two distinct is what tells a client that omitted the header
+  // apart from a token Contentful refused.
   if (!bearerToken) return undefined;
 
   const toolNames = await validateContentfulToken(bearerToken);
-  if (!toolNames) return undefined;
 
   return {
     token: bearerToken,

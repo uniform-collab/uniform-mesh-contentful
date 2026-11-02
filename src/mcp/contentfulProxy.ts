@@ -38,13 +38,29 @@ async function withContentfulMcp<T>(accessToken: string, run: (client: Client) =
 const TOKEN_TTL_MS = 60_000;
 const tokenCache = new Map<string, { expiresAt: number; toolNames: string[] }>();
 
+export class ContentfulTokenRejected extends Error {
+  constructor(public readonly detail: string) {
+    super(`Contentful rejected the access token: ${detail}`);
+    this.name = 'ContentfulTokenRejected';
+  }
+}
+
 /**
- * Returns the caller's available Contentful tools, or `undefined` when the
- * token is missing or stale. The route turns `undefined` into a real 401, which
- * is what prompts Uniform to run `credentials.refresh()` - a 200 carrying an
- * error body would skip the refresh and bury the problem in the agent's context.
+ * Returns the caller's available Contentful tools, or throws
+ * {@link ContentfulTokenRejected} when Contentful refuses the token.
+ *
+ * Throwing rather than returning `undefined` matters for diagnosis: the auth
+ * wrapper reports a token it never received and a token Contentful refused with
+ * the same "No authorization provided" message, which cannot distinguish a
+ * client that omitted the header from an audience-bound token being rejected
+ * downstream. A throw surfaces as "Invalid token" instead, and the underlying
+ * reason is logged.
+ *
+ * Either way the caller still gets a real 401, which is what prompts Uniform to
+ * run `credentials.refresh()` - a 200 carrying an error body would skip the
+ * refresh and bury the problem in the agent's context.
  */
-export async function validateContentfulToken(accessToken: string): Promise<string[] | undefined> {
+export async function validateContentfulToken(accessToken: string): Promise<string[]> {
   const cached = tokenCache.get(accessToken);
   if (cached && cached.expiresAt > Date.now()) return cached.toolNames;
 
@@ -55,9 +71,9 @@ export async function validateContentfulToken(accessToken: string): Promise<stri
     });
     tokenCache.set(accessToken, { expiresAt: Date.now() + TOKEN_TTL_MS, toolNames });
     return toolNames;
-  } catch {
+  } catch (error) {
     tokenCache.delete(accessToken);
-    return undefined;
+    throw new ContentfulTokenRejected(error instanceof Error ? error.message : String(error));
   }
 }
 
